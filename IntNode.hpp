@@ -1,8 +1,8 @@
 struct IntNode{
-
+	
 	public:
 	int currentNode;
-    IntNode* nextNode;
+	IntNode* nextNode;
 
     IntNode(int cN){
         currentNode = cN;
