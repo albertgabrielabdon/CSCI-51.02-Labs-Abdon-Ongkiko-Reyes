@@ -1,21 +1,20 @@
-#include <iostream>
-#include <string>
 #include "IntStack.hpp" //note: use " and not "
 using namespace std;
 
 int main( void ) {
-   
-    IntStack stack;
-    stack.push(1);
-    cout << "pushed 1" << endl;
-    stack.push(2);
-    cout << "pushed 2" << endl;
-    stack.push(3);
-    cout << "pushed 3" << endl;
+  IntStack stack;
 
-    stack.pop();
-    stack.pop();
+  stack.push(1);
+  stack.push(2);
+  stack.push(3);
 
-    //cout << stack. << endl;
-    return 0;
+  stack.pop();
+  stack.pop();
+  stack.push(4);
+
+  stack.peek();
+  stack.pop();
+  stack.peek();
+
+  return 0;
 }

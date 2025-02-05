@@ -1,12 +1,16 @@
 struct IntNode{
 	
-	public:
-	int currentNode;
-	IntNode* nextNode;
+  int data;
+  IntNode* next;
 
-    IntNode(int cN){
-        currentNode = cN;
-        nextNode = nullptr;
-    }
+  IntNode() {
+    data = 0;  
+    next = nullptr;
+  }
+
+  IntNode(int v) {
+    data = v;
+    next = nullptr;
+  }
 
 };

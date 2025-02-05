@@ -1,26 +1,37 @@
 #include <iostream>
-#include <string>
-#include <list>
 #include "IntNode.hpp" //note: use " and not "
 using namespace std;
 
 struct IntStack{
 
-	IntNode* topStack;
-
-    void pop(){
-        int toRemove = (*topStack).currentNode;
-        topStack = (*topStack).nextNode; //error here
-        //./IntStack.hpp:15:36: error: member reference base type 'int' is not a structure or union
-        cout << "removed value: " << toRemove << endl;
-
+	IntNode* top;
+    
+  // remove a node
+  void pop(){
+      IntNode* newTop = top->next;
+      delete top;
+      top = newTop;
+      cout << "removed a node" << endl;
+  }
+  
+  // add a node
+  void push(int v) {
+      IntNode* newNode = new IntNode(v);
+      newNode->next = top;
+      top = newNode;
+      cout << "added a node with data " << v << endl;
+  }
+  
+  // show all items
+  void peek() {
+    cout << "list of data in stack (starting from the top):" << endl;
+    IntNode* currentNode = top;
+    IntNode* nextNode = top->next;
+    while (nextNode != nullptr) {
+      cout << currentNode->data << endl;
+      currentNode = nextNode;
+      nextNode = currentNode->next;
     }
-
-    void push(int v){
-        IntNode* node = new IntNode(v);
-        (*node).nextNode = topStack;
-        topStack = node;
-
-    }
+  }
 
 };
