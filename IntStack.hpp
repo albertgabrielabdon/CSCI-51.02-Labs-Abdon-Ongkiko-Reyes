@@ -33,7 +33,6 @@ struct IntStack{
   }
   
   // add a node
-  // if adding to an empty stack, change next to null
   void push(int v) {
     IntNode* newNode = new IntNode(v);
     newNode->next = top;
