@@ -47,24 +47,18 @@ struct IntStack{
   }
   
   // show all items
-  void peek() {
-    cout << "list of data in stack (starting from the top):" << endl;
+  void peek() {   
     if (top == nullptr) {
-      cout << "stack is empty" << endl;
+        cout << "stack is empty" << endl;
     }
+
     else {
-      IntNode* currentNode = top;
-      IntNode* nextNode = top->next;
-      while (true) {
-        cout << currentNode->data << endl;
-        currentNode = nextNode;
-        if (currentNode == nullptr) {
-          break;
+        cout << "list of data in stack (starting from the top):" << endl;
+        IntNode* currentNode = top;
+        while (currentNode != nullptr) {
+            cout << currentNode->data << endl;
+            currentNode = currentNode->next;
         }
-        else {
-          nextNode = currentNode->next;
-        }
-      }
     }
   }
 
