@@ -20,6 +20,7 @@ struct IntStack{
     else {
       IntNode* newTop = top->next;
       if (newTop == nullptr) {
+        delete top;
         top = nullptr;
         cout << "removed a node, stack is now empty" << endl;
       }
