@@ -36,12 +36,7 @@ struct IntStack{
   // if adding to an empty stack, change next to null
   void push(int v) {
     IntNode* newNode = new IntNode(v);
-    if (top == nullptr) {
-      newNode->next = nullptr;
-    }
-    else {
-      newNode->next = top;
-    }
+    newNode->next = top;
     top = newNode;
     cout << "added a node with data " << v << endl;
   }
