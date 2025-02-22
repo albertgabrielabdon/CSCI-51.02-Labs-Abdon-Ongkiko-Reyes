@@ -11,10 +11,11 @@ int shlmul(int x, int y){
     y = abs(y);
 
     while (y) {
-        if (y % 2 == 1)              // check if rightmost bit of y is 1
-            product += x << count;   // add (x << 2^count) to product
+        if (y & 1) {                    // check if rightmost bit of y is 1
+            product += x << count;      // add (x << 2^count) to product
+        }
 
-        count++;
+        count ++;
         y = y >> 1;
     }
 
