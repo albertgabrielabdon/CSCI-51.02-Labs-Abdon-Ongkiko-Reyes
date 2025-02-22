@@ -15,7 +15,7 @@ int shlmul(int x, int y){
             product += x << count;   // add (x << 2^count) to product
 
         count++;
-        y /= 2;                     //equivalent of shifting y right by 1
+        y = y >> 1;
     }
 
     if (isNegative)
