@@ -18,16 +18,13 @@ int main(void) {
 
     int T;
     int N;
-    cout << "Number of test cases: " << endl;
     cin >> T;
 
     for(int i = 0; T > i; i++){
-        cout << "Number of points " << endl;
         cin >> N;
 
         Point3D points[N];
         for(int j = 0; N > j; j++){
-            cout << "coords: " << endl;
             cin >> points[j].x >> points[j].y >> points[j].z;
         }
         
