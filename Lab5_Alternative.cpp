@@ -9,9 +9,7 @@ struct Point3D{
 };
 
 int manhattan_distance(Point3D p1, Point3D p2) {
-    int out;
-    out = abs(p1.x - p2.x) + abs(p1.y - p2.y) + abs(p1.z - p2.z);
-    return out;
+    return abs(p1.x - p2.x) + abs(p1.y - p2.y) + abs(p1.z - p2.z);
 }
 
 int main(void) {
@@ -31,7 +29,10 @@ int main(void) {
         for (int k = 0; (N-1) > k; k++){
             cout << manhattan_distance(points[k], points[k+1]) << endl;
         }
+        
+        if (i < T-1) {
+            cout << endl;
+        }
     }
-
     return 0;
 }
