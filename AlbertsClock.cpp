@@ -5,20 +5,20 @@
 using namespace std;
 
 int main(void) {
-
     int count = 1;
+
+    // https://stackoverflow.com/questions/5438482/getting-the-current-time-as-a-yyyy-mm-dd-hh-mm-ss-string
     time_t rawtime;
     tm* timeinfo;
     char buffer [80];
-    // https://stackoverflow.com/questions/5438482/getting-the-current-time-as-a-yyyy-mm-dd-hh-mm-ss-string
 
     if (fork() == 0) {
-        if (execl("/Users/albertgabrielabdon/Desktop/temporary clean up/practice C++/xclock", "myXclock", NULL) == -1) {
+        if (execl("/usr/bin/xclock", "myXclock", NULL) == -1) {
           exit(1);
         }
-      }
-    while (true) {
+    }
 
+    while (true) {
         time(&rawtime);
         timeinfo = localtime(&rawtime);
         strftime(buffer, 80, "[%Y-%m-%d] %H:%M:%S", timeinfo);
