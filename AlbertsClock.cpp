@@ -21,14 +21,15 @@ int main(void) {
     }
 
     while (true) {
-        if (count > 0 && count % 3 == 0) { 
-            cout << "\"This program has gone on for far too long. Type Ctrl+C to abort this timer application.\"" << endl;
-        }
 
         time(&rawtime);
         timeinfo = localtime(&rawtime);
         strftime(buffer, 80, "[%Y-%m-%d] %H:%M:%S", timeinfo);
         puts(buffer);
+
+        if (count > 0 && count % 3 == 0) { 
+            cout << "\"This program has gone on for far too long. Type Ctrl+C to abort this timer application.\"" << endl;
+        }
 
         sleep(10);
         count++;
