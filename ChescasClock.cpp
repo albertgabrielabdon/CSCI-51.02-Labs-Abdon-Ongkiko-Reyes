@@ -5,10 +5,8 @@
 using namespace std;
 
 int main(void) {
-  if (fork() == 0) {
-    if (execl("/usr/bin/xclock", "myXclock", NULL) == -1) {
-      cout << "Could not open or find the program." << endl;
-    }
+  if ((fork() == 0) && (execl("/usr/bin/xclock", "myXclock", NULL) == -1)) {
+    cout << "Could not open or find the program." << endl;
   }
 
   // https://www.programiz.com/cpp-programming/library-function/ctime/strftime
