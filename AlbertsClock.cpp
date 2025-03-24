@@ -13,10 +13,10 @@ int main(void) {
     // https://stackoverflow.com/questions/5438482/getting-the-current-time-as-a-yyyy-mm-dd-hh-mm-ss-string
 
     if (fork() == 0) {
-    if (execl("/Users/albertgabrielabdon/Desktop/temporary clean up/practice C++/xclock", "myXclock", NULL) == -1) {
-      exit(1);
-    }
-  }
+        if (execl("/Users/albertgabrielabdon/Desktop/temporary clean up/practice C++/xclock", "myXclock", NULL) == -1) {
+          exit(1);
+        }
+      }
     while (true) {
 
         time(&rawtime);
@@ -29,10 +29,6 @@ int main(void) {
         }
 
         sleep(10);
-
-        if (count >= 3){
-            count = 0;
-        }
         count++;
     }
 
