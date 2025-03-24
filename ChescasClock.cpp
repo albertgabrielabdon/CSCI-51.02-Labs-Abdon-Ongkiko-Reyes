@@ -32,6 +32,6 @@ int main(void) {
       i = 0;
     }
 
-    sleep(2);
+    sleep(10);
   }
 }
