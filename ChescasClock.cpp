@@ -5,14 +5,13 @@
 using namespace std;
 
 int main(void) {
-  pid_t forkRet = fork();
-
-  if (forkRet == 0) {
+  if (fork() == 0) {
     if (execl("/usr/bin/xclock", "myXclock", NULL) == -1) {
       cout << "Could not open or find the program." << endl;
     }
   }
 
+  // https://www.programiz.com/cpp-programming/library-function/ctime/strftime
   time_t timestamp;
   tm * datetime;
   char output[50];
@@ -22,7 +21,7 @@ int main(void) {
   while (true) {
     time(&timestamp);
     datetime = localtime(&timestamp);
-    strftime(output, 50, "%F %T", datetime); // [yyyy-mm-dd] hh:mm:ss
+    strftime(output, 50, "%F %T", datetime);
 
     cout << output << endl;
     i++;
@@ -33,6 +32,6 @@ int main(void) {
       i = 0;
     }
 
-    sleep(10);
+    sleep(2);
   }
 }
