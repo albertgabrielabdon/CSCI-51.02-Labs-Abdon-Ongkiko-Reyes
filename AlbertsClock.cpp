@@ -5,8 +5,6 @@
 using namespace std;
 
 int main(void) {
-    int id = getpid(); 
-    cout << "This process' ID is: " << id << endl;
 
     int count = 1;
     time_t rawtime;
@@ -14,11 +12,12 @@ int main(void) {
     char buffer [80];
     // https://stackoverflow.com/questions/5438482/getting-the-current-time-as-a-yyyy-mm-dd-hh-mm-ss-string
 
+
     if (fork() == 0) {
-        execl("/Users/albertgabrielabdon/Desktop/temporary clean up/practice C++/xclock",
-              "myXclock", NULL);
-        exit(1);
+    if (execl("/Users/albertgabrielabdon/Desktop/temporary clean up/practice C++/xclock", "myXclock", NULL) == -1) {
+      exit(1);
     }
+  }
 
     while (true) {
 
