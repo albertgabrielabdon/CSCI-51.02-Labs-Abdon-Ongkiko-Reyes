@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
     }
 
     printf("Computed sin(%f) = %.15Lf\n", X, answer);
-    printf("Expected sin(%f) from math.h = %.15Lf\n", X, sinl(X));
+    printf("Expected sin(%f) = %.15Lf\n", X, sinl(X));
 
     free(sum);
     free(threads);
