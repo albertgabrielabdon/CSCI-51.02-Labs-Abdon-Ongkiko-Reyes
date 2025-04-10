@@ -3,8 +3,8 @@
 #include <pthread.h>
 #include <math.h>
 
-int N;      //number of threads
-double X;           //argument for sin
+int N;             //number of threads
+double X;          //argument for sin
 long double* sum;  //array to store partial sums
 
 void* computeSin(void* arg);
@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
     }
 
     N = atoi(argv[1]);   //ascii to integer
-    X = atof(argv[2]);    //  ascii to double
+    X = atof(argv[2]);   //  ascii to double
 
     if (N <= 0) {
         return 1;
@@ -27,8 +27,8 @@ int main(int argc, char* argv[]) {
     /* malloc function allocates space for an object whose size is specified by size and whose value is indeterminate */
 
     for (int i = 0; i < N; i++) {
-        int* index = malloc(sizeof(int));
-        *index = i;
+        int* index = malloc(sizeof(int));    // allocate memory to hold an integer
+        *index = i;                          // store the current value of i into the allocated memory
         pthread_create(&threads[i], NULL, computeSin, (void*)index);   //ID, attr, entry func, args
     }
 
@@ -51,27 +51,26 @@ int main(int argc, char* argv[]) {
 
 long double factorial(int num) {
     long double f = 1;
-    for (int i = 1; i <= num; i++) {
+    for (int i = 1; i <= num; i++) {  // start from one so it doesn't become 0 lol
         f *= i;
     }
     return f;
 }
 
 void* computeSin(void* arg) {
-    int thread_index = *(int*)arg;
-    free(arg);
+    int thread_index = *(int*)arg;  // cast the void* pointer into an int pointer then dereference it for the index
+    free(arg);                      // free main's arg
 
     long double thread_sum = 0.0;
     int k = thread_index;
 
     while (1) {
-        int sign = (k % 2 == 0) ? 1 : -1;
+        int sign = (k % 2 == 0) ? 1 : -1;  // if the index is even then the 
         int exponent = 2 * k + 1;
         long double numerator = sign * powl(X, exponent);
         long double denominator = factorial(exponent);
         long double term = numerator / denominator;
 
-      
         printf("Thread %d adding term %d: %Lf\n", thread_index, k, term);
 
         if (fabsl(term) < 1e-16) {  //float absolute value long
@@ -97,5 +96,6 @@ https://www.reddit.com/r/cprogramming/comments/ye2ghy/c_pthreads_how_to_generate
 https://stackoverflow.com/questions/8223742/how-to-pass-multiple-parameters-to-a-thread-in-c
 https://www.w3schools.com/c/c_conditions_short_hand.php
 https://en.cppreference.com/w/c/numeric/math/fabs
-
+https://www.w3schools.com/c/c_memory_deallocate.php
+https://arc.net/l/quote/igvbrzda
 */
