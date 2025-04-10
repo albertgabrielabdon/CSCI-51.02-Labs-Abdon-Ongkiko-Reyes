@@ -34,7 +34,6 @@ void *sine(void *ptr) {
         }
 
         sleep(1);  
-        printf("Thread %d, added term %d: %Lf\n", thread, i, term);
     }
     
     sum[thread] = sin_sums;  
@@ -44,7 +43,7 @@ void *sine(void *ptr) {
 int main(int argc, char *argv[]) {
     
     N = atoi(argv[1]);          
-    X = strtold(argv[2], NULL);  
+    X = atof(argv[2]);   
     sum = (long double*) malloc(sizeof(long double) * N); 
     printf("N = %d, X = %Lf\n", N, X);
 
@@ -54,10 +53,6 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < N; ++i) {
         iret[i] = i;
         int ret = pthread_create(&threads[i], NULL, sine, &iret[i]);
-        if (ret != 0) {
-            fprintf(stderr, "error: %d\n", i);
-            return EXIT_FAILURE;
-        }
     }
 
     for (int i = 0; i < N; ++i) {
