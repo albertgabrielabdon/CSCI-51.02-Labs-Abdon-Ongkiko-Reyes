@@ -2,9 +2,11 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <math.h>
+#include <unistd.h>
 
 int num;
 int* arr;
+int* iarr;
 pthread_t* parr;
 
 void* someThreadRun(void* idx) {
@@ -35,18 +37,22 @@ int main(int argc, const char * argv[]) {
   num = argc - 1;
  
   arr = malloc(sizeof(int)*num);
+  iarr = malloc(sizeof(int)*num);
   parr = malloc(sizeof(pthread_t)*num);
 
-  int i;
+  pthread_t someThread;
 
-  for (i = 0; i < num; i++) {
+  for (int i = 0; i < num; i++) {
     *(arr + i) =  strtol(argv[i+1], NULL, 0);
+    *(iarr + i) = i;
   }
 
-  for (i = 0; i < num; i++) {
-    pthread_t someThread;
-    *(parr + i) = pthread_create(&someThread, NULL, someThreadRun, (void*) &i);
-    pthread_join(someThread, NULL);
+  for (int i = 0; i < num; i++) { 
+    pthread_create((parr + i), NULL, someThreadRun, (void*) (iarr + i));
+  }
+
+  for (int i = 0; i < num; i++) {
+    pthread_join(*(parr + i), NULL);
   }
   
   return 0;
