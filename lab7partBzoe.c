@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
     /* malloc function allocates space for an object whose size is specified by size and whose value is indeterminate */
 
     for (int i = 0; i < N; i++) {
-        int* index = malloc(sizeof(int));    // allocate memory to hold an integer
+        int* index = malloc(sizeof(int));    // allocate memory to hold an integer | 
         *index = i;                          // store the current value of i into the allocated memory
         pthread_create(&threads[i], NULL, computeSin, (void*)index);   //ID, attr, entry func, args
     }
@@ -65,7 +65,7 @@ void* computeSin(void* arg) {
     int k = thread_index;
 
     while (1) {
-        int sign = (k % 2 == 0) ? 1 : -1;  // if the index is even then the 
+        int sign = (k % 2 == 0) ? 1 : -1;  // if the index is even then the sign of the term is positive and vice versa
         int exponent = 2 * k + 1;
         long double numerator = sign * powl(X, exponent);
         long double denominator = factorial(exponent);
