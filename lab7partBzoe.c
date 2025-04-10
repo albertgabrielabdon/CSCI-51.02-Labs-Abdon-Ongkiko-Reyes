@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
     /* malloc function allocates space for an object whose size is specified by size and whose value is indeterminate */
 
     for (int i = 0; i < N; i++) {
-        int* index = malloc(sizeof(int));    // allocate memory to hold an integer | 
+        int* index = malloc(sizeof(int));    // allocate memory to hold an integer 
         *index = i;                          // store the current value of i into the allocated memory
         pthread_create(&threads[i], NULL, computeSin, (void*)index);   //ID, attr, entry func, args
     }
