@@ -29,7 +29,7 @@ void *sine(void *ptr) {
         }
 
         sin_sums += term;
-        if (fabsl(term) < 1e-16) {
+        if (fabsl(term) < 10e-16) {
             break;
         }
 
@@ -53,9 +53,6 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < N; ++i) {
         iret[i] = i;
         int ret = pthread_create(&threads[i], NULL, sine, &iret[i]);
-    }
-
-    for (int i = 0; i < N; ++i) {
         pthread_join(threads[i], NULL);
     }
 
