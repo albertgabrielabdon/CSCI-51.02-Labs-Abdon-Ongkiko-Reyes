@@ -3,34 +3,9 @@
 #include <pthread.h>
 #include <math.h>
 
-void* someThreadRun(void* idx);
-
 int num;
 int* arr;
 pthread_t* parr;
-
-int main(int argc, const char * argv[]) {
-  
-  num = argc - 1;
- 
-  arr = malloc(sizeof(int)*num);
-  parr = malloc(sizeof(pthread_t)*num);
-
-  int i;
-
-  for (i = 0; i < num; i++) {
-    *(arr + i) =  strtol(argv[i+1], NULL, 0);
-  }
-
-  for (i = 0; i < num; i++) {
-    pthread_t someThread;
-    *(parr + i) = pthread_create(&someThread, NULL, someThreadRun, (void*) &i);
-    printf("thread created\n");
-    pthread_join(someThread, NULL);
-  }
-  return 0;
-
-}
 
 void* someThreadRun(void* idx) {
   int* index = (int*) idx;
@@ -48,4 +23,32 @@ void* someThreadRun(void* idx) {
   printf("arr[%d]: %d has been replaced with %d\n", indexVal, oldVal, newVal);
   void* test;
   return test;
+}
+
+int main(int argc, const char * argv[]) {
+
+  if (argc == 1) {
+    printf("No argument given. Aborting...\n");
+    return 0;
+  }
+  
+  num = argc - 1;
+ 
+  arr = malloc(sizeof(int)*num);
+  parr = malloc(sizeof(pthread_t)*num);
+
+  int i;
+
+  for (i = 0; i < num; i++) {
+    *(arr + i) =  strtol(argv[i+1], NULL, 0);
+  }
+
+  for (i = 0; i < num; i++) {
+    pthread_t someThread;
+    *(parr + i) = pthread_create(&someThread, NULL, someThreadRun, (void*) &i);
+    pthread_join(someThread, NULL);
+  }
+  
+  return 0;
+
 }
