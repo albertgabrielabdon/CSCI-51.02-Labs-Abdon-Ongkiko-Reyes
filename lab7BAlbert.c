@@ -34,6 +34,7 @@ void *sine(void *ptr) {
         }
 
         sleep(1);  
+        printf("Thread %d, added term %d: %Lf\n", thread, i, term);
     }
     
     sum[thread] = sin_sums;  
