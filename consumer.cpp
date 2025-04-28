@@ -1,12 +1,12 @@
-#include <sys/types.h> //for key pid
-#include <sys/ipc.h> //ipc
-#include <sys/sem.h> // sema
-#include <sys/shm.h> //shared mem
+#include <sys/types.h> 
+#include <sys/ipc.h>   
+#include <sys/sem.h>   
+#include <sys/shm.h>   
 
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
-#include <unistd.h> 
+#include <unistd.h>
 
 #include <iostream>
 #include <fstream>
@@ -14,109 +14,124 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-
     if (argc != 3) {
-        cerr << "Wrong input!" << endl;
+        cerr << "Wrong" << endl;
         return 1;
     }
 
     fstream out;
-    out.open(argv[1]);
+    out.open(argv[1], ios::out | ios::binary);
 
     if (!out.is_open()) {
-        exit(1);
+        cerr << "Failed" << endl;
+        return 1;
     }
 
     int shmSize = atoi(argv[2]);
 
     int semId;
-    key_t semKey = 1234; //one sema set
-    // IPC_CREAT - If no existing semaphore set is associated with the key, create one
-    // 0666 - Remember chmod? The 0 in front specifies that the number is in octal
+    key_t semKey = 1234;
     int semFlag = IPC_CREAT | 0666;
-    int nSems = 1; 
+    int nSems = 1;
 
     semId = semget(semKey, nSems, semFlag);
     if (semId == -1) {
-        perror( "semget" );
+        perror("semget failed");
         exit(1);
     }
 
-    // sharedmem part
     int shmId;
-    key_t shmKey = 4567; 
+    key_t shmKey = 4567;
     int shmFlags = IPC_CREAT | 0666;
     char* sharedMem;
 
     shmId = shmget(shmKey, shmSize, shmFlags);
-    sharedMem = (char*) shmat(shmId, NULL, 0);
+    if (shmId == -1) {
+        perror("shmget failed");
+        exit(1);
+    }
 
-    // status part
+    sharedMem = (char*)shmat(shmId, NULL, 0);
+    if (sharedMem == (char*)(-1)) {
+        perror("shmat failed");
+        exit(1);
+    }
+
     int shmStatusId;
-    key_t shmStatusKey = 6969; //for chesca to revise, idk if these mean anyth or if i can just pick any num
+    key_t shmStatusKey = 6969;
     int shmStatusFlags = IPC_CREAT | 0666;
     char* sharedStatusMem;
 
-    shmStatusId = shmget(shmStatusKey, 2, shmStatusFlags);  
-    sharedStatusMem = (char*) shmat(shmStatusId, NULL, 0);
-
-    // my opps
-    int nOperations = 2;
-    struct sembuf sema[nOperations];
-
-    //wait if prod done writing
-    sema[0].sem_num = 0;
-    sema[0].sem_op = 0;  
-    sema[0].sem_flg = SEM_UNDO;
-    //SEM_UNDO: Allocates space for an undo operation if the process 
-    //terminates abnormally. Prevents semaphores from accidentally 
-    //being locked forever, or until a system reboot.
-
-    //then allow consumer to write
-    sema[1].sem_num = 0;
-    sema[1].sem_op = 1;  
-    sema[1].sem_flg = SEM_UNDO | IPC_NOWAIT;
-    //IPC_NOWAIT: Force error if operation must wait.
-
-    //sema ops
-    int opResult = semop(semId, sema, nOperations);
-    if (opResult != -1) {
-            printf("Reading...\n");
-
-            //https://www.programiz.com/c-programming/library-function/string.h/strcmp
-            if (strcmp(sharedStatusMem, "done") == 0) {
-                printf("Producer is done!\n");
-                return 0;  
-            }
-
-            if (strcmp(sharedStatusMem, "written") == 0) {
-                out.write(sharedMem, shmSize);
-                printf("Written!\n");
-
-                strcpy(sharedStatusMem, "read");
-                memset(sharedMem, 0, shmSize);  
-            }
-
-            nOperations = 1;
-            sema[0].sem_num = 0;
-            sema[0].sem_op = -1;  
-            sema[0].sem_flg = SEM_UNDO | IPC_NOWAIT;
-
-            opResult = semop(semId, sema, nOperations);
-            if (opResult != -1) {
-                perror("semop (decrement)");
-            } else {
-                printf( "Successfully decremented semaphore!\n" );
-            }
-
-    } else {
-        perror( "semop (increment)" );
-        sleep(1);
+    shmStatusId = shmget(shmStatusKey, 2, shmStatusFlags);
+    if (shmStatusId == -1) {
+        perror("shmget (status) failed");
+        exit(1);
     }
 
-    //close for memo leaks potentially
+    sharedStatusMem = (char*)shmat(shmStatusId, NULL, 0);
+    if (sharedStatusMem == (char*)(-1)) {
+        perror("shmat (status) failed");
+        exit(1);
+    }
+
+    struct sembuf sema[2];
+
+    while (true) {
+       
+        sema[0].sem_num = 0;
+        sema[0].sem_op = 0; 
+        sema[0].sem_flg = SEM_UNDO;
+        
+        sema[1].sem_num = 0;
+        sema[1].sem_op = 1; 
+        sema[1].sem_flg = SEM_UNDO | IPC_NOWAIT;
+
+        int opResult = semop(semId, sema, 2);
+        if (opResult == -1) {
+            perror("semop wait failed");
+            continue;
+        }
+
+
+        if (strcmp(sharedStatusMem, "done") == 0) {
+            printf("Producer signaled done.\n");
+            break; 
+        }
+
+        if (strcmp(sharedStatusMem, "written") == 0) {
+            printf("Consumer reading...\n");
+
+            for (int i = 0; i < shmSize; i++) {
+                char c = sharedMem[i];
+
+                if (c == '\0') {
+                    break; 
+                }
+
+                out.put(c);
+
+            }
+
+
+            strcpy(sharedStatusMem, "read");
+            memset(sharedMem, 0, shmSize);
+        }
+
+        sema[0].sem_num = 0;
+        sema[0].sem_op = -1; 
+        sema[0].sem_flg = SEM_UNDO | IPC_NOWAIT;
+        
+
+        opResult = semop(semId, sema, 1);
+        if (opResult == -1) {
+            perror("semop release failed");
+        } else {
+            printf("Consumer cycle done.\n");
+        }
+        sleep(2);
+    }
+
     out.close();
-    //https://www.ibm.com/docs/en/zos/2.5.0?topic=functions-shmdt-shared-memory-detach-operation
     shmdt(sharedMem);
     shmdt(sharedStatusMem);
 
