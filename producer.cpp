@@ -156,5 +156,10 @@ int main( int argc, char* argv[] ) {
         }
     }
   file.close();
+  shmdt(sharedMemStat); 
+  shmdt(sharedMemRw);
+  shmctl(shmIdStat, IPC_RMID, NULL);
+  shmctl(shmIdRw, IPC_RMID, NULL);
+  semctl(semId, 0, IPC_RMID);
   return 0;
 }

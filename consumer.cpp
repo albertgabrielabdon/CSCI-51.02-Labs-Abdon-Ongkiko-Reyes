@@ -77,7 +77,11 @@ int main(int argc, char* argv[]) {
     struct sembuf sema[2];
 
     while (true) {
-       
+        if (strcmp(sharedStatusMem, "done") == 0) {
+            printf("Producer signaled done.\n");
+            break; 
+        }
+
         sema[0].sem_num = 0;
         sema[0].sem_op = 0; 
         sema[0].sem_flg = SEM_UNDO;
@@ -90,12 +94,6 @@ int main(int argc, char* argv[]) {
         if (opResult == -1) {
             perror("semop wait failed");
             continue;
-        }
-
-
-        if (strcmp(sharedStatusMem, "done") == 0) {
-            printf("Producer signaled done.\n");
-            break; 
         }
 
         if (strcmp(sharedStatusMem, "written") == 0) {
@@ -134,6 +132,8 @@ int main(int argc, char* argv[]) {
     out.close();
     shmdt(sharedMem);
     shmdt(sharedStatusMem);
-
+    shmctl(shmId, IPC_RMID, NULL);
+    shmctl(shmStatusId, IPC_RMID, NULL);
+    semctl(semId, 0, IPC_RMID);
     return 0;
 }
