@@ -96,61 +96,65 @@ int main( int argc, char* argv[] ) {
   // ** semaphore + shared memory accessing
 
   while (true) {
-    int nOperations = 2;
-    struct sembuf sema[nOperations];
+    if ((strcmp(sharedMemStat, "read") == 0 || strcmp(sharedMemStat, "done") == 0)) {
+      printf("Proceed...\n");
+      int nOperations = 2;
+      struct sembuf sema[nOperations];
 
-    // FIRST:
-    // wait for semaphore to become 0
-    sema[0].sem_num = 0;
-    sema[0].sem_op = 0;
-    sema[0].sem_flg = SEM_UNDO;
-
-    // SECOND:
-    // increment semaphore by 1
-    sema[1].sem_num = 0;
-    sema[1].sem_op = 1;
-    sema[1].sem_flg = SEM_UNDO | IPC_NOWAIT;
-
-    // check if semaphore is currently being used
-    printf("Checking if producer can proceed...\n");
-    int opResult = semop( semId, sema, nOperations );
-
-    if (opResult != -1 && (strcmp(sharedMemStat, "read") == 0 || strcmp(sharedMemStat, "done") == 0)) {
-      printf("File has been found and no one is using shared memory. Writing file contents to shared memory...\n");
-
-      // insert stuff here
-      // should probably add a check for if file is empty
-      char buffer[shmSize];
-      file.read(buffer, shmSize);
-      strcpy(sharedMemRw, buffer);
-      strcpy(sharedMemStat, "written");
-      printf("Status: %s\n", sharedMemStat);
-      printf("Written: %s\n", sharedMemRw);
-
-      // AFTER
-      // decrease semaphore by 1
-      nOperations = 1;
-
+      // FIRST:
+      // wait for semaphore to become 0
       sema[0].sem_num = 0;
-      sema[0].sem_op = -1;
-      sema[0].sem_flg = SEM_UNDO | IPC_NOWAIT;
+      sema[0].sem_op = 0;
+      sema[0].sem_flg = SEM_UNDO;
 
-      opResult = semop( semId, sema, nOperations );
+      // SECOND:
+      // increment semaphore by 1
+      sema[1].sem_num = 0;
+      sema[1].sem_op = 1;
+      sema[1].sem_flg = SEM_UNDO | IPC_NOWAIT;
 
-      if (file.peek() == EOF) {
-        break;
+      // check if semaphore is currently being used
+      printf("Checking if producer can proceed...\n");
+      int opResult = semop( semId, sema, nOperations );
+
+      if (opResult != -1) {
+        printf("File has been found and no one is using shared memory. Writing file contents to shared memory...\n");
+
+        // insert stuff here
+        // should probably add a check for if file is empty
+        char buffer[shmSize];
+        file.read(buffer, shmSize);
+        strcpy(sharedMemRw, buffer);
+        strcpy(sharedMemStat, "written");
+        printf("Status: %s\n", sharedMemStat);
+        printf("Written: %s\n", sharedMemRw);
+
+        // AFTER
+        // decrease semaphore by 1
+        nOperations = 1;
+
+        sema[0].sem_num = 0;
+        sema[0].sem_op = -1;
+        sema[0].sem_flg = SEM_UNDO | IPC_NOWAIT;
+
+        opResult = semop( semId, sema, nOperations );
+
+        if (file.peek() == EOF) {
+          strcpy(sharedMemStat, "done");
+          printf("Status: %s\n", sharedMemStat);
+          break;
+        }
       }
-
-      printf("Waiting a little for consumer to read the file before continuing...");
-      this_thread::sleep_for(2000ms);
+      else {
+        printf("Someone is using the shared memory. Trying again in 2 seconds...\n");
+        this_thread::sleep_for(2000ms);
+      }
     }
     else {
-      printf("Someone may be using the shared memory. Trying again in 2 seconds...\n");
+      printf("Waiting for response from consumer...\n");
       this_thread::sleep_for(2000ms);
     }
   }
-  strcpy(sharedMemStat, "done");
-  printf("Status: %s\n", sharedMemStat);
   file.close();
   return 0;
 }
