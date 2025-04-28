@@ -19,6 +19,11 @@ using namespace std;
 
 int main( int argc, char* argv[] ) {
 
+  if (argc > 3 || argc < 3) {
+    perror("wrong input");
+    exit(1);
+  }
+
   fstream file;
   file.open(argv[1]);
 
@@ -42,6 +47,7 @@ int main( int argc, char* argv[] ) {
 
   // ** semaphore + shared memory initialization
 
+  // semaphore
   int semId;
   key_t semKey = 1234; // will be used by consumer as well, change if there are problems
   int semFlag = IPC_CREAT | 0666;
@@ -54,22 +60,37 @@ int main( int argc, char* argv[] ) {
     exit(1);
   }
 
-  int shmId;
-  key_t shmKey = 4567;
-  int shmFlags = IPC_CREAT | 0666;
-  char* sharedMem;
+  // shared memory for read/write
+  int shmIdRw;
+  key_t shmKeyRw = 4567;
+  int shmFlagsRw = IPC_CREAT | 0666;
+  char* sharedMemRw;
 
-  shmId = shmget( shmKey, shmSize, shmFlags );
+  shmIdRw = shmget( shmKeyRw, shmSize, shmFlagsRw );
 
-  sharedMem = (char*) shmat(shmId, NULL, 0);
+  sharedMemRw = (char*) shmat(shmIdRw, NULL, 0);
 
-  if ((int*) sharedMem == (int*) -1) {
-    perror("shmget failed");
+  if ((int*) sharedMemRw == (int*) -1) {
+    perror("shmget for read/write failed");
+    exit(1);
+  }
+
+  // shared memory for status
+  int shmIdStat;
+  key_t shmKeyStat = 6969;
+  int shmFlagsStat = IPC_CREAT | 0666;
+  char* sharedMemStat;
+
+  shmIdStat = shmget( shmKeyStat, 2, shmFlagsStat );
+
+  sharedMemStat = (char*) shmat(shmIdStat, NULL, 0);
+
+  if ((int*) sharedMemStat == (int*) -1) {
+    perror("shmget for status failed");
     exit(1);
   }
 
   // ** semaphore + shared memory accessing
-
   int nOperations = 2;
   struct sembuf sema[nOperations];
 
@@ -91,16 +112,21 @@ int main( int argc, char* argv[] ) {
     int opResult = semop( semId, sema, nOperations );
 
     if (opResult != -1) {
-      printf("No one is using the file and the shared memory is okay to use. Making changes...\n");
+      printf("File has been found and no one is using shared memory. Writing file contents to shared memory...\n");
 
       // insert stuff here
       // should probably add a check for if file is empty
       while (file.peek() != EOF) {
         char buffer[shmSize];
         file.read(buffer, shmSize);
-        strcpy(sharedMem, buffer);
-        printf("Written: %s\n", buffer);
+        strcpy(sharedMemRw, buffer);
+        strcpy(sharedMemStat, "Written");
+        printf("Status: %s\n", sharedMemStat);
+        printf("Written: %s\n", sharedMemRw);
       }
+
+      strcpy(sharedMemStat, "Done");
+      printf("Status: %s\n", sharedMemStat);
 
       // AFTER
       // decrease semaphore by 1
@@ -112,17 +138,10 @@ int main( int argc, char* argv[] ) {
 
       opResult = semop( semId, sema, nOperations );
 
-      if (opResult != -1) {
-        printf("Successfully wrote to shared memory.\n");
-      }
-      else {
-        printf("Could not write to shared memory.\n");
-      }
-
       break;
     }
     else {
-      printf("Someone may be using the file. Trying again in 2 seconds...\n");
+      printf("Someone may be using the shared memory. Trying again in 2 seconds...\n");
       this_thread::sleep_for(2000ms);
       continue;
     }

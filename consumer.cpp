@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
 
     semId = semget(semKey, nSems, semFlag);
     if (semId == -1) {
-        error( "semget" );
+        perror( "semget" );
         exit(1);
     }
 
